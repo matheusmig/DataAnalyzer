@@ -1,4 +1,4 @@
-﻿namespace DesafioIlegraModels
+﻿namespace DataAnalyzerModels
 {
     public class Salesman : IEntity
     {

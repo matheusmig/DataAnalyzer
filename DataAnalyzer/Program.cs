@@ -1,39 +1,39 @@
 ﻿using DataAnalyzer;
-using DataAnalyzer.Configuration;
+using DataAnalyzerServices;
+using DataAnalyzerServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace DesafioIlegra
+namespace DataAnalyzer
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var configuration = BuildConfiguration();
-            var services = new ServiceCollection();
-            var serviceProvider = ConfigureServices(services, configuration);
-            var app = serviceProvider.GetService<IDataAnalyzerApp>();
-            Task.Run(() => app.Start()).Wait();
-        }
-
-        private static IConfigurationRoot BuildConfiguration()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile($"appsettings.json", optional: true, reloadOnChange: true);
-
-            return builder.Build();
-        }
-
-        private static IServiceProvider ConfigureServices(IServiceCollection services, IConfigurationRoot configurationRoot)
-        {
-            LoggingConfiguration.ConfigureService(services, configurationRoot);
-            IocContainerConfiguration.ConfigureService(services, configurationRoot);
-
-            return services.BuildServiceProvider();
+            await new HostBuilder()
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.AddJsonFile("appsettings.json", optional: true);
+                config.AddEnvironmentVariables();
+            })
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.AddOptions();
+                services.AddTransient<IDataAnalyzerApp, DataAnalyzerApp>();
+                services.AddTransient<IProcessor, Processor>();
+                services.AddHostedService<FileSystemWatcherService>();
+            })
+            .ConfigureLogging((hostContext, configLogging) =>
+            {
+                configLogging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
+                configLogging.AddConsole();
+            })
+            .RunConsoleAsync();
         }
     }
 }

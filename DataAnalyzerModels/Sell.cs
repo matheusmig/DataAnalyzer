@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DesafioIlegraModels
+namespace DataAnalyzerModels
 {
     public class Sell : IEntity
     {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DesafioIlegraModels
+﻿
+namespace DataAnalyzerModels
 {
     public interface IEntity
     {
