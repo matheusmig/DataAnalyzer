@@ -1,8 +1,10 @@
-﻿namespace DataAnalyzerModels
+﻿using DataAnalyzerConstants;
+
+namespace DataAnalyzerModels
 {
-    public class Client : IEntity
+    public class Client : IModel
     {
-        public int Id { get; set; }
+        public CodeIdentifier Code { get; set; }
         public string CNPJ { get; set; }
         public string Name { get; set; }
         public string BusinessArea { get; set; }

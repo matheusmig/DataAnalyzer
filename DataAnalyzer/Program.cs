@@ -1,12 +1,9 @@
-﻿using DataAnalyzer;
-using DataAnalyzerServices;
+﻿using DataAnalyzerServices;
 using DataAnalyzerServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace DataAnalyzer
@@ -26,6 +23,7 @@ namespace DataAnalyzer
                 services.AddOptions();
                 services.AddTransient<IDataAnalyzerApp, DataAnalyzerApp>();
                 services.AddTransient<IProcessor, Processor>();
+                services.AddScoped<IDataWarehouse, DataWarehouse>();
                 services.AddHostedService<FileSystemWatcherService>();
             })
             .ConfigureLogging((hostContext, configLogging) =>
