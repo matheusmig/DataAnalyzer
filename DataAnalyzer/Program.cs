@@ -1,4 +1,5 @@
-﻿using DataAnalyzerServices;
+﻿using DataAnalyzerModels.Settings;
+using DataAnalyzerServices;
 using DataAnalyzerServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,12 @@ namespace DataAnalyzer
                 services.AddTransient<IProcessor, Processor>();
                 services.AddScoped<IDataWarehouse, DataWarehouse>();
                 services.AddHostedService<FileSystemWatcherService>();
+
+                services.ConfigureAll<FolderSettings>(settings =>
+                {
+                    settings.InputPath = System.Environment.GetEnvironmentVariable("HOMEPATH") + "\\data\\in";
+                    settings.OutputPath = System.Environment.GetEnvironmentVariable("HOMEPATH") + "\\data\\out";
+                });
             })
             .ConfigureLogging((hostContext, configLogging) =>
             {

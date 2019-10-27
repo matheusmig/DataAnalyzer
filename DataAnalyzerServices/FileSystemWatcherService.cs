@@ -1,8 +1,10 @@
 ﻿using DataAnalyzerModels;
+using DataAnalyzerModels.Settings;
 using DataAnalyzerServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -16,21 +18,23 @@ namespace DataAnalyzerServices
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IOptionsMonitor<FolderSettings> _folderSettings;
 
         private FileSystemWatcher _watcher;
 
-        public FileSystemWatcherService(ILogger<FileSystemWatcherService> logger, IServiceProvider serviceProvider)
+        public FileSystemWatcherService(ILogger<FileSystemWatcherService> logger, IServiceProvider serviceProvider,
+            IOptionsMonitor<FolderSettings> folderSettings)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _folderSettings = folderSettings;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Executing FileSystemWatcherService");
 
-            var path = Directory.GetCurrentDirectory();
-            _watcher = new FileSystemWatcher(path);
+            _watcher = new FileSystemWatcher(_folderSettings.CurrentValue.InputPath);
 
             // Watch for changes in LastAccess and LastWrite times, and
             // the renaming of files or directories.
@@ -67,53 +71,72 @@ namespace DataAnalyzerServices
             _logger.LogDebug("File changed");           
         }
 
-        private void Created(object sender, FileSystemEventArgs e) 
+        private void Created(object sender, FileSystemEventArgs e)
         {
             _logger.LogInformation("File created");
 
             using var scope = _serviceProvider.CreateScope();
-            using var sr = File.OpenText(e.FullPath); 
+            var services = scope.ServiceProvider;
+            var processor = services.GetRequiredService<IProcessor>();
+            var cache = services.GetRequiredService<IDataWarehouse>();
+            
+            Report report = null;
+            string filename = null;
+                       
+            try
             {
-                try
+                using var sr = File.OpenText(e.FullPath);
                 {
-                    var services = scope.ServiceProvider;
-                    var processor = services.GetRequiredService<IProcessor>();
-                    var cache = services.GetRequiredService<IDataWarehouse>();
+                    while (!sr.EndOfStream)
                     {
-                        while (!sr.EndOfStream)
+                        var line = sr.ReadLine();
+                        var result = processor.ProcessLineAsync(line).Result;
+                        if (result != null)
                         {
-                            var line = sr.ReadLine();
-                            var result = processor.ProcessLineAsync(line).Result;
-                            if (result != null)
+                            switch (result)
                             {
-                                switch (result)
-                                {
-                                    case Salesman salesman:
-                                        cache.Add(salesman);
-                                        break;
-                                    case Client client:
-                                        cache.Add(client);
-                                        break;
-                                    case Sale sale:
-                                        cache.Add(sale);
-                                        break;
-                                    default:
-                                        _logger.LogError($"A instance of type {result.GetType().Name}");
-                                        break;
-                                }
+                                case Salesman salesman:
+                                    cache.Add(salesman);
+                                    break;
+                                case Client client:
+                                    cache.Add(client);
+                                    break;
+                                case Sale sale:
+                                    cache.Add(sale);
+                                    break;
+                                default:
+                                    _logger.LogError($"A instance of type {result.GetType().Name}");
+                                    break;
                             }
                         }
-
-                        var report = cache.GetReport();
-                        _logger.LogInformation(JsonConvert.SerializeObject(report));
-                    }
+                    }                     
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, nameof(Created));
-                }
-
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, nameof(Created));
+                return;
+            }
+           
+
+            report = cache.GetReport();
+            if (report == null)
+            {
+                _logger.LogWarning("Cannot generate a report");
+                return;
+            }
+            
+            try
+            {
+                var outputFilename = _folderSettings.CurrentValue.OutputPath + '\\' + e.Name;
+                using var writer = new StreamWriter(outputFilename, append: false);
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(writer, report);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, nameof(Created));
+            }        
         }
     }
 }
