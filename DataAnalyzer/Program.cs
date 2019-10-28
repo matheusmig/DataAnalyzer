@@ -23,6 +23,7 @@ namespace DataAnalyzer
             {
                 services.AddOptions();
                 services.AddTransient<IDataAnalyzerApp, DataAnalyzerApp>();
+                services.AddTransient<IJob, Job>();
                 services.AddTransient<IProcessor, Processor>();
 
                 services.AddScoped<IDataWarehouse, DataWarehouse>();
@@ -42,6 +43,10 @@ namespace DataAnalyzer
             {
                 configLogging.AddConfiguration(hostContext.Configuration.GetSection("Logging"));
                 configLogging.AddConsole();
+            })
+            .UseDefaultServiceProvider(options => {
+                options.ValidateScopes = true;
+                options.ValidateOnBuild = true;
             })
             .RunConsoleAsync();
         }
