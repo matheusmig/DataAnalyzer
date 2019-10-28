@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DataAnalyzer
@@ -16,6 +17,7 @@ namespace DataAnalyzer
             await new HostBuilder()
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
+                config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddJsonFile("appsettings.json", optional: true);
                 config.AddEnvironmentVariables();
             })

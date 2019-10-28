@@ -3,6 +3,7 @@ using DataAnalyzerServices.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,16 @@ namespace DataAnalyzerServices
         {
             _logger.LogInformation("Executing FileSystemWatcherService");
 
-            _watcher = new FileSystemWatcher(_folderSettings.CurrentValue.InputPath);
+            try
+            {
+                var inputdir = Directory.CreateDirectory(_folderSettings.CurrentValue.InputPath);
+                var ouputdir = Directory.CreateDirectory(_folderSettings.CurrentValue.OutputPath);
+                _watcher = new FileSystemWatcher(inputdir.FullName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing input/output folder or FileSystemWatcher");
+            }            
 
             // Watch for changes in LastAccess and LastWrite times, and
             // the renaming of files or directories.
@@ -72,7 +82,7 @@ namespace DataAnalyzerServices
         {
             _logger.LogInformation("File created");
 
-            _jobQueue.QueueJob(async token => await _job.HandleNewFileAsync(e.Name, e.FullPath));
+            _jobQueue.QueueJob(async token => await _job.HandleNewFileAsync(e.Name, e.FullPath, token));
         }       
     }
 }
