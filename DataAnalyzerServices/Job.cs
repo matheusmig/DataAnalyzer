@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DataAnalyzerServices
@@ -24,7 +25,7 @@ namespace DataAnalyzerServices
             _serviceProvider = serviceProvider;
         }
 
-        public async Task HandleNewFileAsync(string fileName, string inputFileFullPath)
+        public async Task HandleNewFileAsync(string fileName, string inputFileFullPath, CancellationToken ct)
         {
             using var scope = _serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
@@ -39,8 +40,10 @@ namespace DataAnalyzerServices
                 {
                     while (!sr.EndOfStream)
                     {
-                        var line = sr.ReadLine();
-                        var result = processor.ProcessLineAsync(line).Result;
+                        ct.ThrowIfCancellationRequested();
+
+                        var line = await sr.ReadLineAsync();
+                        var result = processor.ProcessLine(line);
                         if (result != null)
                         {
                             switch (result)
@@ -61,6 +64,11 @@ namespace DataAnalyzerServices
                         }
                     }
                 }
+            }
+            catch (OperationCanceledException opCancEx)
+            {
+                _logger.LogWarning(opCancEx, "Operation canceled");
+                return;
             }
             catch (Exception ex)
             {

@@ -18,7 +18,7 @@ namespace DataAnalyzerServices
             _logger = logger;
         }
 
-        public async Task<IModel> ProcessLineAsync(string line)
+        public IModel ProcessLine(string line)
         {
             if (!TryValidateLine(line, out var code))
                 return default;
@@ -29,7 +29,7 @@ namespace DataAnalyzerServices
                 case CodeIdentifier.Client: return ProcessClient(line);
                 case CodeIdentifier.Sale: return ProcessSale(line);
                 default: 
-                    _logger.LogWarning($"{nameof(ProcessLineAsync)} Invalid Code: {line}");
+                    _logger.LogWarning($"{nameof(ProcessLine)} Invalid Code: {line}");
                     break;
             }
 

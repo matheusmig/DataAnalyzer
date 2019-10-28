@@ -72,9 +72,7 @@ namespace DataAnalyzerServices
         {
             _logger.LogInformation("File created");
 
-            _jobQueue.QueueJob(async token => _job.HandleNewFileAsync(e.Name, e.FullPath));
-        }
-
-       
+            _jobQueue.QueueJob(async token => await _job.HandleNewFileAsync(e.Name, e.FullPath));
+        }       
     }
 }
