@@ -74,7 +74,7 @@ namespace DataAnalyzerServices
             }
 
             var splittedLine = line.Split(ConfigurationConstants.LineSeparatorCharacter);
-            if (splittedLine.Length < 4)
+            if (splittedLine.Length != 4)
             {
                 _logger.LogWarning($"{nameof(ProcessSalesman)} : Invalid split length : {line} : {splittedLine.Length}");
                 return null;
@@ -105,7 +105,7 @@ namespace DataAnalyzerServices
             }
 
             var splittedLine = line.Split(ConfigurationConstants.LineSeparatorCharacter);
-            if (splittedLine.Length < 4)
+            if (splittedLine.Length != 4)
             {
                 _logger.LogWarning($"{nameof(ProcessClient)} : Invalid split length : {line} : {splittedLine.Length}");
                 return null;
@@ -130,7 +130,7 @@ namespace DataAnalyzerServices
             }
 
             var splittedLine = line.Split(ConfigurationConstants.LineSeparatorCharacter);
-            if (splittedLine.Length < 4)
+            if (splittedLine.Length != 4)
             {
                 _logger.LogWarning($"{nameof(ProcessSale)} : Invalid split length : {line} : {splittedLine.Length}");
                 return null;
@@ -166,7 +166,7 @@ namespace DataAnalyzerServices
 
             var ItemsLineWithoutMarks = itemsLine.Remove(itemsLine.Length - 1).Remove(0, 1);    
             var itemsText = ItemsLineWithoutMarks.Split(ConfigurationConstants.ItemSeparatorCharacter);
-            if (!itemsText.Any())
+            if (!itemsText.Any() || itemsText.Length >= ValidationConstants.MaxItemsAllowed)
             {
                 _logger.LogWarning($"{nameof(ProcessItems)} : Invalid item separator : {ItemsLineWithoutMarks}");
                 return result;

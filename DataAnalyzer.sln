@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAnalyzerModels", "DataA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAnalyzerServices", "DataAnalyzerServices\DataAnalyzerServices.csproj", "{D67C1774-E9AF-41A0-B353-E31DF2E420B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAnalyzerConstants", "DataAnalyzerConstants\DataAnalyzerConstants.csproj", "{1771A974-3F57-4D27-8398-BE1C62ABEC6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAnalyzerConstants", "DataAnalyzerConstants\DataAnalyzerConstants.csproj", "{1771A974-3F57-4D27-8398-BE1C62ABEC6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAnalyzer.Tests", "DataAnalyzerXUnitTest\DataAnalyzer.Tests.csproj", "{F2680679-D264-4628-853F-3D8265468E85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1771A974-3F57-4D27-8398-BE1C62ABEC6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1771A974-3F57-4D27-8398-BE1C62ABEC6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1771A974-3F57-4D27-8398-BE1C62ABEC6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2680679-D264-4628-853F-3D8265468E85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2680679-D264-4628-853F-3D8265468E85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2680679-D264-4628-853F-3D8265468E85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2680679-D264-4628-853F-3D8265468E85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
