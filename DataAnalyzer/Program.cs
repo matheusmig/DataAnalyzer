@@ -24,8 +24,13 @@ namespace DataAnalyzer
                 services.AddOptions();
                 services.AddTransient<IDataAnalyzerApp, DataAnalyzerApp>();
                 services.AddTransient<IProcessor, Processor>();
+
                 services.AddScoped<IDataWarehouse, DataWarehouse>();
+
+                services.AddSingleton<IJobQueue, JobQueue>();
+
                 services.AddHostedService<FileSystemWatcherService>();
+                services.AddHostedService<QueuedHostedService>();
 
                 services.ConfigureAll<FolderSettings>(settings =>
                 {

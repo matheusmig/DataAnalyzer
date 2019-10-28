@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,15 +18,17 @@ namespace DataAnalyzerServices
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IOptionsMonitor<FolderSettings> _folderSettings;
+        private readonly IJobQueue _jobQueue;
 
         private FileSystemWatcher _watcher;
 
         public FileSystemWatcherService(ILogger<FileSystemWatcherService> logger, IServiceProvider serviceProvider,
-            IOptionsMonitor<FolderSettings> folderSettings)
+            IOptionsMonitor<FolderSettings> folderSettings, IJobQueue jobQueue)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _folderSettings = folderSettings;
+            _jobQueue = jobQueue;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,7 +54,7 @@ namespace DataAnalyzerServices
             _watcher.Error += Error;
 
             _watcher.EnableRaisingEvents = true;
-
+            
             return Task.CompletedTask;
         }
 
@@ -75,17 +76,21 @@ namespace DataAnalyzerServices
         {
             _logger.LogInformation("File created");
 
+            _jobQueue.QueueJob(async token => ProcessFileJob(e.Name, e.FullPath));
+        }
+
+        private async Task ProcessFileJob(string fileName, string fileFullPath)
+        {
             using var scope = _serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             var processor = services.GetRequiredService<IProcessor>();
             var cache = services.GetRequiredService<IDataWarehouse>();
-            
+
             Report report = null;
-            string filename = null;
-                       
             try
             {
-                using var sr = File.OpenText(e.FullPath);
+                _logger.LogInformation($"{nameof(ProcessFileJob)} Start reading file : {fileName} : {DateTime.UtcNow.TimeOfDay}");
+                using var sr = File.OpenText(fileFullPath);
                 {
                     while (!sr.EndOfStream)
                     {
@@ -109,7 +114,7 @@ namespace DataAnalyzerServices
                                     break;
                             }
                         }
-                    }                     
+                    }
                 }
             }
             catch (Exception ex)
@@ -117,18 +122,19 @@ namespace DataAnalyzerServices
                 _logger.LogError(ex, nameof(Created));
                 return;
             }
-           
 
+            _logger.LogInformation($"{nameof(ProcessFileJob)} Start generating report : {fileName} : {DateTime.UtcNow.TimeOfDay}");
             report = cache.GetReport();
             if (report == null)
             {
                 _logger.LogWarning("Cannot generate a report");
                 return;
             }
-            
+
             try
             {
-                var outputFilename = _folderSettings.CurrentValue.OutputPath + '\\' + e.Name;
+                _logger.LogInformation($"{nameof(ProcessFileJob)} Start writing report : {fileName} : {DateTime.UtcNow.TimeOfDay}");
+                var outputFilename = _folderSettings.CurrentValue.OutputPath + '\\' + fileName;
                 using var writer = new StreamWriter(outputFilename, append: false);
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(writer, report);
@@ -136,7 +142,7 @@ namespace DataAnalyzerServices
             catch (Exception ex)
             {
                 _logger.LogError(ex, nameof(Created));
-            }        
+            }            
         }
     }
 }
