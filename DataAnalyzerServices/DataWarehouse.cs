@@ -94,7 +94,10 @@ namespace DataAnalyzerServices.Interfaces
                 ClientCount = _clientCount,
                 SalesmanCount = _salesmanCount,
                 MostExpensiveSaleId = _mostExpensiveSale?.SaleId ?? 0,
-                WorstSalesman = _pricesBySalesman.OrderByDescending(o => o.Value).Select(x => x.Key).FirstOrDefault()?.Name
+                WorstSalesman = _pricesBySalesman
+                .OrderByDescending(o => o.Key.Salary > 0 ? (o.Value / o.Key.Salary) : decimal.MinValue)
+                .Select(x => x.Key)
+                .FirstOrDefault()?.Name
             };
         }
     }
