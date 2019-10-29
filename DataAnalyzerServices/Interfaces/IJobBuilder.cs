@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace DataAnalyzerServices.Interfaces
 {
-    public interface IJob
+    public interface IJobBuilder
     {
         Task HandleNewFileAsync(string fileName, string inputFileFullPath, CancellationToken ct);
     }

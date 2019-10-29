@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace DataAnalyzerServices
 {
-    public class Job : IJob
+    public class JobBuilder : IJobBuilder
     {
         private readonly ILogger _logger;
         private readonly IOptionsMonitor<FolderSettings> _folderSettings;
         private readonly IServiceProvider _serviceProvider;
 
-        public Job(ILogger<IJob> logger, IOptionsMonitor<FolderSettings> folderSettings, IServiceProvider serviceProvider)
+        public JobBuilder(ILogger<IJobBuilder> logger, IOptionsMonitor<FolderSettings> folderSettings, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _folderSettings = folderSettings;
@@ -49,13 +49,13 @@ namespace DataAnalyzerServices
                             switch (result)
                             {
                                 case Salesman salesman:
-                                    cache.Add(salesman);
+                                    cache.TryAdd(salesman);
                                     break;
                                 case Client client:
-                                    cache.Add(client);
+                                    cache.TryAdd(client);
                                     break;
                                 case Sale sale:
-                                    cache.Add(sale);
+                                    cache.TryAdd(sale);
                                     break;
                                 default:
                                     _logger.LogError($"A instance of type {result.GetType().Name}");
