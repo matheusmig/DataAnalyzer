@@ -106,5 +106,22 @@ namespace DataAnalyzerXUnitTest
             // Assert
             Assert.Null(response);
         }
+
+        [Theory(DisplayName = "Process unknown codes")]
+        [InlineData("1ç1234567891234çPedroç50000")]
+        [InlineData("004ç1234567891234çPedroç50000")]
+        [InlineData("000ç1234567891234çJoão Silvaç50000.90")]
+        public void TestProcessInvalidCodes(string line)
+        {
+            // Arrange
+            DefaultArrange();
+            var service = new Processor(logger.Object);
+
+            // Act
+            var response = service.ProcessLine(line);
+
+            // Assert
+            Assert.Null(response);
+        }
     }
 }
