@@ -11,6 +11,6 @@ namespace DataAnalyzerModels
         public IEnumerable<Item> Items { get; set; }
         public string SalesmanName { get; set; }
 
-        public decimal TotalPrice => Items != null ? Items.Sum(x => x.Price) : 0;
+        public decimal TotalPrice => Items != null ? Items.Sum(x => x.Price * x.Quantity) : 0;
     }
 }
