@@ -88,7 +88,6 @@ namespace DataAnalyzerServices
 
             return new Salesman()
             {
-                Code = CodeIdentifier.Salesman,
                 CPF = splittedLine[1],
                 Name = splittedLine[2],
                 Salary = salaryDecimal
@@ -113,7 +112,6 @@ namespace DataAnalyzerServices
 
             return new Client()
             {
-                Code = CodeIdentifier.Client,
                 CNPJ = splittedLine[1],
                 Name = splittedLine[2],
                 BusinessArea = splittedLine[3]
@@ -146,7 +144,6 @@ namespace DataAnalyzerServices
 
             return new Sale()
             {
-                Code = CodeIdentifier.Sale,
                 SaleId = saleId,
                 Items = items,
                 SalesmanName = splittedLine[3]
