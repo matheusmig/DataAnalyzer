@@ -14,7 +14,6 @@ namespace DataAnalyzerServices.Interfaces
         private readonly ILogger _logger;
 
         private int _clientCount;
-
         private int _salesmanCount;
 
         private readonly object _mostExpensiveSalePriceLock;
@@ -40,15 +39,14 @@ namespace DataAnalyzerServices.Interfaces
             _pricesBySalesman = new ConcurrentDictionary<Salesman, decimal>();
         }
 
-        public void Add<T>(T model) where T : IModel
+        public bool TryAdd<T>(T model) where T : IModel
         {
-
             switch (model)
             {
                 case Client client:
                     {
                         Interlocked.Increment(ref _clientCount);
-                        break;
+                        return true;
                     }                    
                 case Salesman salesman:
                     {
@@ -56,8 +54,8 @@ namespace DataAnalyzerServices.Interfaces
 
                         lock (_salesmansLock)
                             _salesmans.Add(salesman);
-                        _pricesBySalesman.TryAdd(salesman, 0);
-                        break;
+                        
+                        return true;
                     }
                 case Sale sale:
                     {
@@ -78,8 +76,13 @@ namespace DataAnalyzerServices.Interfaces
                             _pricesBySalesman.AddOrUpdate(salesman, totalPrice, 
                                 (key, existingValue) =>  existingValue += totalPrice);
                         }
-                     
-                        break;
+
+                        return true;
+                    }
+                default:
+                    {
+                        _logger.LogWarning($"{nameof(TryAdd)} Unknown model");
+                        return false;
                     }
             }
         }
