@@ -4,6 +4,6 @@ namespace DataAnalyzerModels
 {
     public interface IModel
     {
-        CodeIdentifier Code { get; set; }
+        CodeIdentifier Code { get; }
     }
 }

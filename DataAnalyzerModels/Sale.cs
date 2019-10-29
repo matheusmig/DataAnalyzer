@@ -6,11 +6,11 @@ namespace DataAnalyzerModels
 {
     public class Sale : IModel
     {
-        public CodeIdentifier Code { get; set; }
+        public CodeIdentifier Code => CodeIdentifier.Sale;
         public int SaleId { get; set; }
         public IEnumerable<Item> Items { get; set; }
         public string SalesmanName { get; set; }
 
-        public decimal TotalPrice => Items.Sum(x => x.Price);
+        public decimal TotalPrice => Items != null ? Items.Sum(x => x.Price) : 0;
     }
 }

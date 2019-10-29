@@ -15,12 +15,12 @@ namespace DataAnalyzerServices
         private readonly ILogger _logger;
         private readonly IOptionsMonitor<FolderSettings> _folderSettings;
         private readonly IJobQueue _jobQueue;
-        private readonly IJob _job;
+        private readonly IJobBuilder _job;
 
         private FileSystemWatcher _watcher;
 
         public FileSystemWatcherService(ILogger<FileSystemWatcherService> logger,
-            IOptionsMonitor<FolderSettings> folderSettings, IJobQueue jobQueue, IJob job)
+            IOptionsMonitor<FolderSettings> folderSettings, IJobQueue jobQueue, IJobBuilder job)
         {
             _logger = logger;
             _folderSettings = folderSettings;

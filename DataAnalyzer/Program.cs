@@ -25,7 +25,7 @@ namespace DataAnalyzer
             {
                 services.AddOptions();
                 services.AddTransient<IDataAnalyzerApp, DataAnalyzerApp>();
-                services.AddTransient<IJob, Job>();
+                services.AddTransient<IJobBuilder, JobBuilder>();
                 services.AddTransient<IProcessor, Processor>();
 
                 services.AddScoped<IDataWarehouse, DataWarehouse>();
